@@ -10,7 +10,9 @@ const WebSocket = require('ws');
 
 const app       = express();
 const PORT      = process.env.PORT || 5000;
-const AUDIO_DIR = path.join(__dirname, 'audio_output');
+const AUDIO_DIR = process.env.AUDIO_DIR || (process.platform === 'win32'
+  ? path.join(__dirname, 'audio_output')
+  : '/tmp/audio_output');
 const MAX_RETRIES = 3;
 
 app.use(cors());
