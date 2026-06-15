@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceAI Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #07071A;
+  --glass: rgba(12, 12, 30, 0.75);
+  --glass2: rgba(18, 18, 40, 0.6);
+  --glass3: rgba(25, 25, 55, 0.5);
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --border3: rgba(139,92,246,0.3);
+  --text: #F0EEFF;
+  --text2: #9D9BBF;
+  --text3: #55527A;
+  --accent: #8B5CF6;
+  --accent2: #A78BFA;
+  --accent3: #7C3AED;
+  --cyan: #06B6D4;
+  --pink: #EC4899;
+  --green: #10B981;
+  --red: #EF4444;
+  --radius: 18px;
+  --radius-sm: 13px;
+  --radius-xs: 9px;
+  --shadow: 0 30px 60px rgba(0,0,0,0.6);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ===== ANIMATED BACKGROUND ===== */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  animation: orb-drift ease-in-out infinite alternate;
+}
+
+.orb-1 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(139,92,246,0.18), transparent 70%);
+  top: -250px; left: -180px;
+  animation-duration: 18s;
+}
+.orb-2 {
+  width: 550px; height: 550px;
+  background: radial-gradient(circle, rgba(6,182,212,0.14), transparent 70%);
+  top: 35%; right: -200px;
+  animation-duration: 22s;
+  animation-delay: -6s;
+}
+.orb-3 {
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, rgba(236,72,153,0.1), transparent 70%);
+  bottom: -150px; left: 25%;
+  animation-duration: 16s;
+  animation-delay: -11s;
+}
+.orb-4 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(124,58,237,0.12), transparent 70%);
+  top: 15%; left: 55%;
+  animation-duration: 26s;
+  animation-delay: -4s;
+}
+
+@keyframes orb-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(40px, -50px) scale(1.06); }
+  66%  { transform: translate(-30px, 35px) scale(0.94); }
+  100% { transform: translate(25px, 20px) scale(1.02); }
+}
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(139,92,246,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139,92,246,0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+/* ===== LAYOUT ===== */
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+}
+
+/* ===== HEADER ===== */
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: fade-up 0.7s ease both;
+}
+
+.logo-ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px; height: 72px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(6,182,212,0.1));
+  border: 1px solid rgba(139,92,246,0.25);
+  font-size: 30px;
+  margin-bottom: 18px;
+  position: relative;
+  box-shadow: 0 0 50px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-ring:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 0 70px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.logo-ring::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 23px;
+  background: linear-gradient(135deg, rgba(139,92,246,0.5), rgba(6,182,212,0.4), rgba(236,72,153,0.3));
+  z-index: -1;
+  opacity: 0.6;
+}
+
+.logo-pulse {
+  position: absolute;
+  inset: -8px;
+  border-radius: 28px;
+  border: 1px solid rgba(139,92,246,0.2);
+  animation: logo-ring-pulse 3s ease infinite;
+}
+
+@keyframes logo-ring-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0; transform: scale(1.15); }
+}
+
+h1 {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #F0EEFF 0%, #C4B5FD 45%, #67E8F9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: all 0.4s ease;
+}
+
+.status-pill.online  { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.25); color: #34D399; }
+.status-pill.offline { background: rgba(239,68,68,0.1);  border-color: rgba(239,68,68,0.25);  color: #FCA5A5; }
+.status-pill.connecting { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.25); color: #FCD34D; }
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.status-pill.online .status-dot  { animation: blink 2s ease infinite; box-shadow: 0 0 6px currentColor; }
+.status-pill.connecting .status-dot { animation: blink 0.8s ease infinite; }
+
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
+  animation: fade-up 0.6s ease both;
+  transition: border-color 0.3s;
+}
+
+.card:hover { border-color: var(--border2); }
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.18s; }
+.card:nth-child(3) { animation-delay: 0.26s; }
+
+.card-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--text3);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
+
+/* ===== TEXTAREA ===== */
+textarea {
+  width: 100%;
+  background: rgba(8, 8, 22, 0.6);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+  padding: 14px 16px;
+  resize: none;
+  min-height: 150px;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  letter-spacing: -0.1px;
+}
+
+textarea:focus {
+  border-color: rgba(139,92,246,0.55);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.09), 0 0 24px rgba(139,92,246,0.06);
+  background: rgba(10, 10, 28, 0.7);
+}
+
+textarea::placeholder { color: var(--text3); }
+
+.char-count {
+  font-size: 11px;
+  color: var(--text3);
+  text-align: right;
+  margin-top: 7px;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s;
+}
+
+.char-count.warn { color: #FBBF24; }
+.char-count.over { color: var(--red); }
+
+/* ===== VOICE GROUPS ===== */
+.voice-group { margin-bottom: 14px; }
+.voice-group:last-child { margin-bottom: 0; }
+
+.voice-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: var(--text3);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+/* ===== VOICE GRID ===== */
+.voice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 7px;
+}
+
+.voice-btn {
+  background: rgba(12, 12, 30, 0.6);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(139,92,246,0.09), rgba(6,182,212,0.04));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.voice-btn:hover {
+  border-color: rgba(139,92,246,0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.voice-btn:hover::after { opacity: 1; }
+
+.voice-btn.active {
+  background: rgba(139,92,246,0.1);
+  border-color: rgba(139,92,246,0.55);
+  box-shadow: 0 0 24px rgba(139,92,246,0.12), 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+  transform: translateY(-2px);
+}
+
+.voice-btn.active::after { opacity: 1; }
+
+.v-check {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: #fff; font-weight: 700;
+  opacity: 0;
+  transform: scale(0.4) rotate(-10deg);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
+}
+
+.voice-btn.active .v-check {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.voice-btn-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 2px;
+  transition: color 0.2s;
+  position: relative; z-index: 1;
+}
+
+.voice-btn.active .voice-btn-name { color: var(--accent2); }
+
+.voice-btn-meta {
+  font-size: 11px;
+  color: var(--text3);
+  display: block;
+  margin-bottom: 7px;
+  transition: color 0.2s;
+  position: relative; z-index: 1;
+}
+
+.voice-btn.active .voice-btn-meta { color: rgba(167,139,250,0.55); }
+
+.gender-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  position: relative; z-index: 1;
+}
+
+.gender-badge.f {
+  background: rgba(236,72,153,0.1);
+  color: #F472B6;
+  border: 1px solid rgba(236,72,153,0.2);
+}
+
+.gender-badge.m {
+  background: rgba(6,182,212,0.1);
+  color: #67E8F9;
+  border: 1px solid rgba(6,182,212,0.2);
+}
+
+/* ===== SLIDERS ===== */
+.controls-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.control-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ctrl-name {
+  font-size: 12.5px;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.ctrl-val {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent2);
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.2);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-variant-numeric: tabular-nums;
+  min-width: 58px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.slider-track { position: relative; }
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.07);
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 14px rgba(139,92,246,0.55);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb,
+input[type="range"]:focus::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 0 22px rgba(139,92,246,0.75);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 14px rgba(139,92,246,0.55);
+}
+
+/* ===== GENERATE BUTTON ===== */
+.generate-wrap {
+  animation: fade-up 0.6s ease 0.34s both;
+  margin-bottom: 1rem;
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #6366F1 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: -0.15px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 36px rgba(139,92,246,0.45), 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s;
+}
+
+.generate-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+  animation: btn-shimmer 2.8s ease infinite;
+}
+
+@keyframes btn-shimmer {
+  0%   { left: -100%; }
+  100% { left: 220%; }
+}
+
+.generate-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 48px rgba(139,92,246,0.55), 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.generate-btn:active { transform: translateY(0) scale(0.99); }
+
+.generate-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.generate-btn:disabled::before { display: none; }
+
+.btn-spinner {
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  display: none;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== ERROR BAR ===== */
+.error-bar {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.22);
+  border-radius: var(--radius-xs);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #FCA5A5;
+  margin-top: 10px;
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.error-bar.show { display: flex; animation: fade-up 0.2s ease; }
+
+.error-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+/* ===== AUDIO PLAYER ===== */
+.player-card {
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(139,92,246,0.22);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  display: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(139,92,246,0.08), var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.player-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 5%; right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139,92,246,0.5), rgba(6,182,212,0.3), transparent);
+}
+
+.player-card.visible { display: block; animation: fade-up 0.4s ease; }
+
+.player-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.play-btn {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; color: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 4px 24px rgba(139,92,246,0.45);
+  position: relative;
+}
+
+.play-btn:hover { transform: scale(1.1); box-shadow: 0 8px 36px rgba(139,92,246,0.6); }
+.play-btn:active { transform: scale(0.96); }
+
+.play-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid rgba(139,92,246,0.3);
+  animation: play-ring 2.5s ease infinite;
+}
+
+@keyframes play-ring {
+  0%,100% { opacity: 0.8; transform: scale(1); }
+  50%      { opacity: 0;   transform: scale(1.35); }
+}
+
+.play-btn.playing .play-ring { animation: play-ring 1.2s ease infinite; }
+
+.player-info { flex: 1; min-width: 0; }
+
+.player-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+
+.player-meta { font-size: 12px; color: var(--text3); }
+
+/* Waveform */
+.waveform-wrap {
+  height: 58px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  margin-bottom: 14px;
+  cursor: pointer;
+  background: rgba(8,8,22,0.55);
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+#waveform-canvas { width: 100%; height: 100%; display: block; }
+
+/* Progress bar */
+.prog-track {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent3), var(--accent), var(--cyan));
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+.prog-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0;
+  width: 50px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35));
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text3);
+  margin-bottom: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.player-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 9px 8px;
+  background: rgba(12,12,30,0.7);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-xs);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background: rgba(139,92,246,0.1);
+  border-color: rgba(139,92,246,0.3);
+  color: var(--accent2);
+  transform: translateY(-1px);
+}
+
+/* ===== HISTORY ===== */
+.history-card {
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: none;
+  box-shadow: var(--shadow);
+}
+
+.history-card.visible { display: block; animation: fade-up 0.4s ease; }
+
+.history-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  color: var(--text3);
+}
+
+.clear-btn {
+  font-size: 12px;
+  color: var(--text3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px 10px;
+  border-radius: var(--radius-xs);
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+}
+
+.clear-btn:hover { color: var(--red); background: rgba(239,68,68,0.08); }
+
+.history-list { padding: 8px; }
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.history-item:hover { background: rgba(139,92,246,0.06); }
+
+.hist-play {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.22);
+  color: var(--accent2);
+  font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hist-play:hover { background: var(--accent); color: #fff; border-color: transparent; }
+
+.hist-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hist-badge {
+  font-size: 10.5px;
+  color: var(--text3);
+  background: var(--glass3);
+  border: 1px solid var(--border);
+  padding: 2px 9px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(18px);
+  background: rgba(20, 20, 44, 0.96);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(139,92,246,0.22);
+  border-radius: 11px;
+  padding: 11px 22px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: 999;
+  white-space: nowrap;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.4); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 580px) {
+  h1 { font-size: 26px; }
+  .controls-row { grid-template-columns: 1fr; gap: 1.25rem; }
+  .voice-grid { grid-template-columns: repeat(2, 1fr); }
+  .player-actions { grid-template-columns: 1fr 1fr; }
+  .app { padding: 1.5rem 1rem 4rem; }
+  .logo-ring { width: 60px; height: 60px; font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-canvas">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+</div>
+<div class="bg-grid"></div>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-ring">
+      <div class="logo-pulse"></div>
+      🎙️
+    </div>
+    <h1>VoiceAI Studio</h1>
+    <div class="status-pill connecting" id="statusPill">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </div>
+
+  <!-- Text Input -->
+  <div class="card">
+    <div class="card-label">Your Text</div>
+    <textarea id="inputText" placeholder="Type or paste the text you want to convert to speech..." maxlength="5000"></textarea>
+    <div class="char-count" id="charCount">0 / 5000</div>
+  </div>
+
+  <!-- Voice Selection -->
+  <div class="card">
+    <div class="card-label">Select Voice</div>
+    <div id="voiceGrid"></div>
+  </div>
+
+  <!-- Settings -->
+  <div class="card">
+    <div class="card-label">Audio Settings</div>
+    <div class="controls-row">
+      <div class="control-group">
+        <div class="control-label-row">
+          <span class="ctrl-name">Speed</span>
+          <span class="ctrl-val" id="rateVal">Normal</span>
+        </div>
+        <div class="slider-track">
+          <input type="range" id="rateSlider" min="-50" max="50" value="0" step="1">
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="control-label-row">
+          <span class="ctrl-name">Pitch</span>
+          <span class="ctrl-val" id="pitchVal">Normal</span>
+        </div>
+        <div class="slider-track">
+          <input type="range" id="pitchSlider" min="-50" max="50" value="0" step="1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate -->
+  <div class="generate-wrap">
+    <button class="generate-btn" id="generateBtn" onclick="generateVoice()">
+      <div class="btn-spinner" id="spinner"></div>
+      <span id="generateLabel">🎤 &nbsp;Convert to Voice</span>
+    </button>
+    <div class="error-bar" id="errorBar">
+      <span class="error-icon">⚠</span>
+      <span id="errorMsg"></span>
+    </div>
+  </div>
+
+  <!-- Audio Player -->
+  <div class="player-card" id="playerCard">
+    <div class="player-top">
+      <button class="play-btn" id="playBtn" onclick="togglePlay()" aria-label="Play">
+        <div class="play-ring"></div>
+        <span id="playIcon">▶</span>
+      </button>
+      <div class="player-info">
+        <div class="player-name" id="playerName">—</div>
+        <div class="player-meta" id="playerMeta">Ready to play</div>
+      </div>
+    </div>
+    <div class="waveform-wrap" onclick="seekFromClick(event)">
+      <canvas id="waveform-canvas"></canvas>
+    </div>
+    <div class="prog-track" id="progTrack" onclick="seekAudio(event)">
+      <div class="prog-fill" id="progFill"></div>
+    </div>
+    <div class="time-row">
+      <span id="curTime">0:00</span>
+      <span id="totTime">0:00</span>
+    </div>
+    <div class="player-actions">
+      <button class="action-btn" onclick="replayAudio()">↺ &nbsp;Replay</button>
+      <a class="action-btn" id="dlLink" href="#" download>⬇ &nbsp;Download</a>
+      <button class="action-btn" onclick="copyText()">⎘ &nbsp;Copy text</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="history-card" id="histCard">
+    <div class="history-hdr">
+      <span class="history-lbl">Recent</span>
+      <button class="clear-btn" onclick="clearHistory()">Clear all</button>
+    </div>
+    <div class="history-list" id="histList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+let voices = {};
+let selectedVoice = 'aria';
+let audioEl = null;
+let currentText = '';
+let isPlaying = false;
+let history = [];
+let waveBars = [];
+
+/* ——— Init ——— */
+async function init() {
+  try {
+    const res = await fetch(`${API}/api/voices`);
+    const data = await res.json();
+    voices = data.voices;
+    renderVoices();
+    setStatus('online', 'Backend connected');
+  } catch {
+    setStatus('offline', 'Backend offline — start app.py');
+    renderVoicesFallback();
+  }
+}
+
+function setStatus(state, text) {
+  const pill = document.getElementById('statusPill');
+  const txt  = document.getElementById('statusText');
+  pill.className = `status-pill ${state}`;
+  txt.textContent = text;
+}
+
+/* ——— Voices ——— */
+function renderVoices() {
+  const container = document.getElementById('voiceGrid');
+  container.innerHTML = '';
+
+  // Group by accent
+  const groups = {};
+  Object.entries(voices).forEach(([key, v]) => {
+    const acc = v.accent || 'Other';
+    if (!groups[acc]) groups[acc] = [];
+    groups[acc].push([key, v]);
+  });
+
+  const accentOrder = ['American', 'British', 'Australian', 'Canadian', 'Irish', 'New Zealand', 'Singaporean', 'South African'];
+  const sorted = accentOrder.filter(a => groups[a]).concat(Object.keys(groups).filter(a => !accentOrder.includes(a)));
+
+  let globalIdx = 0;
+  sorted.forEach(accent => {
+    const group = document.createElement('div');
+    group.className = 'voice-group';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'voice-group-label';
+    lbl.textContent = accent;
+    group.appendChild(lbl);
+
+    const grid = document.createElement('div');
+    grid.className = 'voice-grid';
+
+    groups[accent].forEach(([key, v]) => {
+      const btn = document.createElement('button');
+      btn.className = `voice-btn${key === selectedVoice ? ' active' : ''}`;
+      btn.dataset.key = key;
+      btn.style.cssText = `animation: fade-up 0.4s ease ${globalIdx * 0.03 + 0.05}s both`;
+      const gc = v.gender === 'Female' ? 'f' : 'm';
+      btn.innerHTML = `
+        <div class="v-check">✓</div>
+        <span class="voice-btn-name">${esc(v.label)}</span>
+        <span class="voice-btn-meta">${esc(v.style)}</span>
+        <span class="gender-badge ${gc}">${esc(v.gender)}</span>`;
+      btn.onclick = () => selectVoice(key);
+      grid.appendChild(btn);
+      globalIdx++;
+    });
+
+    group.appendChild(grid);
+    container.appendChild(group);
+  });
+}
+
+function renderVoicesFallback() {
+  voices = {
+    aria:        { label:'Aria',        gender:'Female', style:'Natural, conversational', accent:'American' },
+    jenny:       { label:'Jenny',       gender:'Female', style:'Friendly, warm',          accent:'American' },
+    guy:         { label:'Guy',         gender:'Male',   style:'Professional, clear',     accent:'American' },
+    ava:         { label:'Ava',         gender:'Female', style:'Expressive, bright',      accent:'American' },
+    emma:        { label:'Emma',        gender:'Female', style:'Smooth, articulate',      accent:'American' },
+    michelle:    { label:'Michelle',    gender:'Female', style:'Cheerful, pleasant',      accent:'American' },
+    ana:         { label:'Ana',         gender:'Female', style:'Lively, youthful',        accent:'American' },
+    andrew:      { label:'Andrew',      gender:'Male',   style:'Warm, engaging',          accent:'American' },
+    brian:       { label:'Brian',       gender:'Male',   style:'Natural, dynamic',        accent:'American' },
+    christopher: { label:'Christopher', gender:'Male',   style:'Reliable, authoritative', accent:'American' },
+    eric:        { label:'Eric',        gender:'Male',   style:'Rational, confident',     accent:'American' },
+    roger:       { label:'Roger',       gender:'Male',   style:'Lively, upbeat',          accent:'American' },
+    steffan:     { label:'Steffan',     gender:'Male',   style:'Deep, composed',          accent:'American' },
+    sonia:       { label:'Sonia',       gender:'Female', style:'Refined, polished',       accent:'British' },
+    libby:       { label:'Libby',       gender:'Female', style:'Spirited, clear',         accent:'British' },
+    maisie:      { label:'Maisie',      gender:'Female', style:'Fresh, energetic',        accent:'British' },
+    ryan:        { label:'Ryan',        gender:'Male',   style:'Warm, approachable',      accent:'British' },
+    natasha:     { label:'Natasha',     gender:'Female', style:'Confident, professional', accent:'Australian' },
+    william:     { label:'William',     gender:'Male',   style:'Relaxed, casual',         accent:'Australian' },
+    clara:       { label:'Clara',       gender:'Female', style:'Bright, friendly',        accent:'Canadian' },
+    liam:        { label:'Liam',        gender:'Male',   style:'Smooth, personable',      accent:'Canadian' },
+    emily:       { label:'Emily',       gender:'Female', style:'Warm, cheerful',          accent:'Irish' },
+    connor:      { label:'Connor',      gender:'Male',   style:'Grounded, sincere',       accent:'Irish' },
+    mitchell:    { label:'Mitchell',    gender:'Male',   style:'Easygoing, genuine',      accent:'New Zealand' },
+    luna:        { label:'Luna',        gender:'Female', style:'Crisp, professional',     accent:'Singaporean' },
+    luke:        { label:'Luke',        gender:'Male',   style:'Rich, resonant',          accent:'South African' },
+  };
+  renderVoices();
+}
+
+function selectVoice(key) {
+  selectedVoice = key;
+  document.querySelectorAll('.voice-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.key === key);
+  });
+}
+
+/* ——— Sliders ——— */
+document.getElementById('rateSlider').addEventListener('input', function() {
+  const v = +this.value;
+  document.getElementById('rateVal').textContent = v === 0 ? 'Normal' : (v > 0 ? `+${v}%` : `${v}%`);
+});
+
+document.getElementById('pitchSlider').addEventListener('input', function() {
+  const v = +this.value;
+  document.getElementById('pitchVal').textContent = v === 0 ? 'Normal' : (v > 0 ? `+${v}Hz` : `${v}Hz`);
+});
+
+/* ——— Char count ——— */
+document.getElementById('inputText').addEventListener('input', function() {
+  const n = this.value.length;
+  const el = document.getElementById('charCount');
+  el.textContent = `${n} / 5000`;
+  el.className = 'char-count' + (n >= 5000 ? ' over' : n > 4700 ? ' warn' : '');
+});
+
+/* ——— Generate ——— */
+async function generateVoice() {
+  const text = document.getElementById('inputText').value.trim();
+  if (!text) { showError('Please enter some text first.'); return; }
+
+  hideError();
+  setLoading(true);
+
+  try {
+    const res = await fetch(`${API}/api/synthesize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        voice: selectedVoice,
+        rate: +document.getElementById('rateSlider').value,
+        pitch: +document.getElementById('pitchSlider').value,
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'Synthesis failed.'); return; }
+
+    const url = `${API}${data.audio_url}`;
+    currentText = text;
+
+    setupPlayer(url, data);
+    addHistory({ text, voice: data.voice, url, filename: data.filename, chars: data.characters });
+
+  } catch {
+    showError('Could not reach the server. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+/* ——— Player ——— */
+function setupPlayer(url, data) {
+  if (audioEl) { audioEl.pause(); audioEl.src = ''; }
+  audioEl = new Audio(url);
+  isPlaying = false;
+
+  audioEl.onloadedmetadata = () => {
+    document.getElementById('totTime').textContent = fmtTime(audioEl.duration);
+  };
+
+  audioEl.ontimeupdate = () => {
+    if (!audioEl.duration) return;
+    const pct = audioEl.currentTime / audioEl.duration;
+    document.getElementById('progFill').style.width = (pct * 100) + '%';
+    document.getElementById('curTime').textContent = fmtTime(audioEl.currentTime);
+    drawWave(pct);
+  };
+
+  audioEl.onended = () => {
+    isPlaying = false;
+    refreshPlayBtn();
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('progFill').style.width = '100%';
+  };
+
+  const vName = voices[selectedVoice]?.label || selectedVoice;
+  document.getElementById('playerName').textContent = vName;
+  document.getElementById('playerMeta').textContent = `${data.characters} characters · ${voices[selectedVoice]?.style || ''}`;
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('curTime').textContent = '0:00';
+  document.getElementById('totTime').textContent = '—';
+  document.getElementById('dlLink').href = `${API}/api/download/${data.filename}`;
+
+  document.getElementById('playerCard').classList.add('visible');
+  initWave();
+
+  audioEl.play();
+  isPlaying = true;
+  refreshPlayBtn();
+  document.getElementById('playBtn').classList.add('playing');
+}
+
+function togglePlay() {
+  if (!audioEl) return;
+  if (isPlaying) {
+    audioEl.pause();
+    isPlaying = false;
+    document.getElementById('playBtn').classList.remove('playing');
+  } else {
+    audioEl.play();
+    isPlaying = true;
+    document.getElementById('playBtn').classList.add('playing');
+  }
+  refreshPlayBtn();
+}
+
+function replayAudio() {
+  if (!audioEl) return;
+  audioEl.currentTime = 0;
+  audioEl.play();
+  isPlaying = true;
+  refreshPlayBtn();
+  document.getElementById('playBtn').classList.add('playing');
+}
+
+function seekAudio(e) {
+  if (!audioEl || !audioEl.duration) return;
+  const track = document.getElementById('progTrack');
+  const rect = track.getBoundingClientRect();
+  audioEl.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * audioEl.duration;
+}
+
+function seekFromClick(e) { seekAudio(e); }
+
+function refreshPlayBtn() {
+  document.getElementById('playIcon').textContent = isPlaying ? '⏸' : '▶';
+}
+
+function copyText() {
+  if (!currentText) return;
+  navigator.clipboard.writeText(currentText).then(() => showToast('Text copied to clipboard ✓'));
+}
+
+/* ——— Waveform ——— */
+function initWave() {
+  waveBars = Array.from({ length: 68 }, () => 0.08 + Math.random() * 0.92);
+  drawWave(0);
+}
+
+function drawWave(progress) {
+  const canvas = document.getElementById('waveform-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
+  const w = rect.width, h = rect.height;
+  const n = waveBars.length;
+  const barW = (w / n) * 0.48;
+  const gap  = (w / n) * 0.52;
+
+  ctx.clearRect(0, 0, w, h);
+
+  for (let i = 0; i < n; i++) {
+    const x = i * (barW + gap);
+    const bh = waveBars[i] * (h - 6) + 3;
+    const y  = (h - bh) / 2;
+    const played = i / n <= progress;
+
+    if (played) {
+      const g = ctx.createLinearGradient(0, y, 0, y + bh);
+      g.addColorStop(0, '#8B5CF6');
+      g.addColorStop(0.5, '#7C3AED');
+      g.addColorStop(1, '#06B6D4');
+      ctx.fillStyle = g;
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    }
+
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, barW, bh, 2);
+    else ctx.rect(x, y, barW, bh);
+    ctx.fill();
+  }
+}
+
+/* ——— History ——— */
+function addHistory(item) {
+  history.unshift(item);
+  if (history.length > 8) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const card = document.getElementById('histCard');
+  const list = document.getElementById('histList');
+  if (!history.length) { card.classList.remove('visible'); return; }
+  card.classList.add('visible');
+  list.innerHTML = '';
+  history.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'history-item';
+    el.innerHTML = `
+      <div class="hist-play" onclick="playHistItem(${idx})">▶</div>
+      <div class="hist-text">${esc(item.text)}</div>
+      <div class="hist-badge">${esc(item.voice)}</div>`;
+    list.appendChild(el);
+  });
+}
+
+function playHistItem(idx) {
+  const item = history[idx];
+  if (!item) return;
+  currentText = item.text;
+  setupPlayer(item.url, { voice: item.voice, characters: item.chars, filename: item.filename });
+}
+
+function clearHistory() {
+  history = [];
+  document.getElementById('histCard').classList.remove('visible');
+  showToast('History cleared');
+}
+
+/* ——— UI helpers ——— */
+function setLoading(on) {
+  const btn     = document.getElementById('generateBtn');
+  const spinner = document.getElementById('spinner');
+  const label   = document.getElementById('generateLabel');
+  btn.disabled  = on;
+  spinner.style.display = on ? 'block' : 'none';
+  label.textContent = on ? 'Generating audio…' : '🎤  Convert to Voice';
+}
+
+function showError(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorBar').classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('errorBar').classList.remove('show');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function fmtTime(s) {
+  if (!s || isNaN(s)) return '0:00';
+  return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+init();
+</script>
+</body>
+</html>
