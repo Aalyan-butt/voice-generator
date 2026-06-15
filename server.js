@@ -236,8 +236,9 @@ app.post('/api/synthesize', async (req, res) => {
   const { text = '', voice = 'aria', rate = 0, pitch = 0 } = req.body;
   const trimmed = text.trim();
 
-  if (!trimmed)              return res.status(400).json({ error: 'Text is required' });
-  if (trimmed.length > 5000) return res.status(400).json({ error: 'Text too long — max 5000 characters' });
+  if (!trimmed) return res.status(400).json({ error: 'Text is required' });
+  const wordCount = trimmed.split(/\s+/).filter(Boolean).length;
+  if (wordCount > 5000) return res.status(400).json({ error: 'Text too long — max 5000 words' });
 
   const voiceInfo  = VOICES[voice] ?? VOICES.aria;
   const filename   = connectId() + '.mp3';

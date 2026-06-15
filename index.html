@@ -915,8 +915,8 @@ input[type="range"]::-moz-range-thumb {
   <!-- Text Input -->
   <div class="card">
     <div class="card-label">Your Text</div>
-    <textarea id="inputText" placeholder="Type or paste the text you want to convert to speech..." maxlength="5000"></textarea>
-    <div class="char-count" id="charCount">0 / 5000</div>
+    <textarea id="inputText" placeholder="Type or paste the text you want to convert to speech..."></textarea>
+    <div class="char-count" id="charCount">0 / 5000 words</div>
   </div>
 
   <!-- Voice Selection -->
@@ -1135,11 +1135,11 @@ document.getElementById('pitchSlider').addEventListener('input', function() {
   document.getElementById('pitchVal').textContent = v === 0 ? 'Normal' : (v > 0 ? `+${v}Hz` : `${v}Hz`);
 });
 
-/* ——— Char count ——— */
+/* ——— Word count ——— */
 document.getElementById('inputText').addEventListener('input', function() {
-  const n = this.value.length;
+  const n = this.value.trim() ? this.value.trim().split(/\s+/).length : 0;
   const el = document.getElementById('charCount');
-  el.textContent = `${n} / 5000`;
+  el.textContent = `${n} / 5000 words`;
   el.className = 'char-count' + (n >= 5000 ? ' over' : n > 4700 ? ' warn' : '');
 });
 
